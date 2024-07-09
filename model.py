@@ -20,6 +20,7 @@ def model_drop_init(image_shape):
     model_drop.add(layers.Flatten()) # Flattens 2 dimesnonal input into a 1 dimensional
     model_drop.add(layers.Dense(64, activation="relu")) # Regular dense layer of 64 nodes, relu activation
     model_drop.add(layers.Dense(100)) # Output dense layer where # of nodes = # of classes 
+    model_drop.add(layers.Softmax())
     return model_drop
 
 # Create cnn model with 2 layers of convolution and pooling and l2 regularizer
@@ -34,4 +35,5 @@ def model_l2_init(image_shape):
     model_l2.add(layers.Flatten()) # Flattens 2 dimesnonal input into a 1 dimensional
     model_l2.add(layers.Dense(64, activation="relu")) # Regular dense layer of 64 nodes, relu activation
     model_l2.add(layers.Dense(100)) # Output dense layer where # of nodes = # of classes 
+    model_drop.add(layers.Softmax())
     return model_l2

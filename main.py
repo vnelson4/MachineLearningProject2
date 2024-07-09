@@ -34,12 +34,13 @@ model_l2.compile(
     metrics=["accuracy"],
 )
 
+stopper = callbacks.EarlyStopping(monitor='val_accuracy', patience=5)
 
 history_drop = model_drop.fit(
-    train_images, train_labels, epochs=epochs_drop, validation_data=(test_images, test_labels)
+    train_images, train_labels, epochs=epochs_drop, callbacks=[stopper], validation_data=(test_images, test_labels)
 )
 
 history_l2 = model_drop.fit(
-    train_images, train_labels, epochs=epochs_l2, validation_data=(test_images, test_labels)
+    train_images, train_labels, epochs=epochs_l2, callbacks=[stopper], validation_data=(test_images, test_labels)
 )
 

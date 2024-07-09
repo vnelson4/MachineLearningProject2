@@ -44,3 +44,22 @@ history_l2 = model_drop.fit(
     train_images, train_labels, epochs=epochs_l2, callbacks=[stopper], validation_data=(test_images, test_labels)
 )
 
+# Plot accuracies vs epoch for model_drop
+plt.plot(history_drop.history["accuracy"], label="accuracy")
+plt.plot(history_drop.history["val_accuracy"], label="val_accuracy")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.ylim([0.5, 1])
+plt.title("model_drop accuracy vs epochs")
+plt.legend(loc="lower right")
+test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
+
+# Plot accuracies vs epoch for model_l2
+plt.plot(history_l2.history["accuracy"], label="accuracy")
+plt.plot(history_l2.history["val_accuracy"], label="val_accuracy")
+plt.xlabel("Epoch")
+plt.ylabel("Accuracy")
+plt.ylim([0.5, 1])
+plt.title("model_l2 accuracy vs epochs")
+plt.legend(loc="lower right")
+test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)

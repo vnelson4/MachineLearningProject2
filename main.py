@@ -40,7 +40,7 @@ history_drop = model_drop.fit(
     train_images, train_labels, epochs=epochs_drop, callbacks=[stopper], validation_data=(test_images, test_labels)
 )
 
-history_l2 = model_drop.fit(
+history_l2 = model_l2.fit(
     train_images, train_labels, epochs=epochs_l2, callbacks=[stopper], validation_data=(test_images, test_labels)
 )
 

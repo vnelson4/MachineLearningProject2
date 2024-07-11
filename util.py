@@ -18,3 +18,9 @@ def get_images():
     train_images, test_images = train_images / 255.0, test_images / 255.0
     image_shape = train_images.shape[1:] # Get image shape, needs to be 32x32x3 (32x32 and 3 color panes)
     return train_images, train_labels, test_images, test_labels, image_shape
+
+def diff_scores(drop_scores, l2_scores):
+    scores = []
+    for i in range(5):
+        scores.append(drop_scores[i]-l2_scores[i])
+    return scores

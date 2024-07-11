@@ -2,6 +2,7 @@ import util
 import model
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import t
 import tensorflow as tf 
 from tensorflow.keras import datasets, layers, models, callbacks
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
@@ -11,8 +12,8 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 # Code that runs the main loop of training the TensorFlow models
 
 # Specify number of epochs for the two models
-epochs_drop = 50
-epochs_l2 = 50
+epochs_drop = 5
+epochs_l2 = 5
 
 # Specify batch size for training
 batch_size = 20
@@ -22,6 +23,9 @@ num_folds = 5
 
 # Specify confidence level ( < 1)
 cf_lvl = 0.95
+df = num_folds - 1
+
+# Training:
 
 train_images, train_labels, test_images, test_labels, img_shape = util.get_images()
 
@@ -42,9 +46,9 @@ for train, test in kfold.split(X,y):
         X[train], y[train], epochs=epochs_drop, batch_size=batch_size, callbacks=[stopper], validation_data=(X[test], y[test])
     )
 
-    test_loss, test_acc = model_drop.evaluate(test_images, test_labels, verbose=2)
-    drop_loss.append(test_loss*100)
-    drop_acc.append(str(test_acc*100) + "%")
+    test_loss, test_acc = model_drop.evaluate(X[test], y[test], verbose=2)
+    drop_loss.append(test_loss)
+    drop_acc.append(test_acc)
 
 l2_acc = []
 l2_loss = []
@@ -56,15 +60,23 @@ for train, test in kfold.split(X,y):
         X[train], y[train], epochs=epochs_drop, batch_size=batch_size, callbacks=[stopper], validation_data=(X[test], y[test])
     )
 
-    test_loss, test_acc = model_drop.evaluate(test_images, test_labels, verbose=2)
-    l2_loss.append(test_loss*100)
-    l2_acc.append(str(test_acc*100) + "%")
-
+    test_loss, test_acc = model_drop.evaluate(X[test], y[test], verbose=2)
+    l2_loss.append(test_loss)
+    l2_acc.append(test_acc)
+    
+print("\n\ndrop model accuracy and loss:")
 print(drop_acc)
 print(drop_loss)
-
+print("\nl2 model accuracy and loss:")
 print(l2_acc)
 print(l2_loss)
+
+diff = util.diff_scores(drop_acc, l2_acc)
+mean_diff = np.mean(diff)
+std_diff = np.std(diff, ddof=df)
+cf_interval = t.interval(cf_lvl, df, loc=mean_diff, scale=std_diff/np.sqrt(num_folds))
+
+print(f"\nConfidence Interval = {cf_interval}")
 
 """
 print(

@@ -11,35 +11,12 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 
 # Code that runs the main loop of training the TensorFlow models
 
-class_names = [
-    "beaver", "dolphin", "otter", "seal", "whale",
-    "aquarium fish", "flatfish", "ray", "shark", "trout",
-    "orchids", "poppies", "roses", "sunflowers", "tulips",
-    "bottles", "bowls", "cans", "cups", "plates",
-    "apples", "mushrooms", "oranges", "pears", "sweet peppers",
-    "clock", "computer keyboard", "lamp", "telephone", "television",
-    "bed", "chair", "couch", "table", "wardrobe",
-    "bee", "beetle", "butterfly", "caterpillar", "cockroach",
-    "bear", "leopard", "lion", "tiger", "wolf",
-    "bridge", "castle", "house", "road", "skyscraper",
-    "cloud", "forest", "mountain", "plain", "sea",
-    "camel", "cattle", "chimpanzee", "elephant", "kangaroo",
-    "fox", "porcupine", "possum", "raccoon", "skunk",
-    "crab", "lobster", "snail", "spider", "worm",
-    "baby", "boy", "girl", "man", "woman",
-    "crocodile", "dinosaur", "lizard", "snake", "turtle",
-    "hamster", "mouse", "rabbit", "shrew", "squirrel",
-    "maple", "oak", "palm", "pine", "willow",
-    "bicycle", "bus", "motorcycle", "pickup truck", "train",
-    "lawn-mower", "rocket", "streetcar", "tank", "tractor",
-]
-
 # Specify number of epochs for the two models
-epochs_drop = 5
-epochs_l2 = 5
+epochs_drop = 100
+epochs_l2 = 100
 
 # Specify batch size for training
-batch_size = 20
+batch_size = 100
 
 # Specify K for K-fold cross validaton
 num_folds = 5
@@ -51,17 +28,8 @@ df = num_folds - 1
 # Training:
 
 train_images, train_labels, test_images, test_labels, img_shape = util.get_images()
-"""
-model_d = model.model_drop_init(img_shape)
-model_l = model.model_l2_init(img_shape)
 
-logits = model_d.predict(test_images)
-preds = tf.math.argmax(tf.nn.softmax(logits), axis=1)
-conf_mat = confusion_matrix(test_labels, preds)
-#plt.figure(figsize=(20, 7))
-util.plot_confusion_matrix(conf_mat, classes=class_names)
-"""
-stopper = callbacks.EarlyStopping(monitor='val_accuracy', patience=5)
+stopper = callbacks.EarlyStopping(monitor='val_loss', patience=5, mode="min")
 
 kfold = StratifiedKFold(n_splits=num_folds)
 
@@ -86,6 +54,17 @@ for train, test in kfold.split(X_drop, y_drop):
     drop_loss.append(test_loss)
     drop_acc.append(test_acc)
 
+    plt.style.use("ggplot")
+    # Plot accuracies vs epoch for model_drop
+    plt.plot(history_drop.history["accuracy"], label="accuracy")
+    plt.plot(history_drop.history["val_accuracy"], label="val_accuracy")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.ylim([0, 1])
+    plt.title("model_drop accuracy vs epochs")
+    plt.legend(loc="lower right")
+    plt.show()
+
 l2_acc = []
 l2_loss = []
 
@@ -100,6 +79,17 @@ for train, test in kfold.split(X_l2, y_l2):
     test_loss, test_acc = model_l2.evaluate(X_l2[test], y_l2[test], verbose=2)
     l2_loss.append(test_loss)
     l2_acc.append(test_acc)
+
+    plt.style.use("ggplot")
+    # Plot accuracies vs epoch for model_drop
+    plt.plot(history_l2.history["accuracy"], label="accuracy")
+    plt.plot(history_l2.history["val_accuracy"], label="val_accuracy")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.ylim([0, 1])
+    plt.title("model_l2 accuracy vs epochs")
+    plt.legend(loc="lower right")
+    plt.show()
     
 print("\n\ndrop model accuracy and loss:")
 print(drop_acc)
@@ -116,44 +106,9 @@ cf_interval = t.interval(cf_lvl, df, loc=mean_diff, scale=std_diff/np.sqrt(num_f
 print(f"\nConfidence Interval = {cf_interval}")
 print("\n")
 
+drop_np = np.array(drop_acc)
+l2_np = np.array(l2_acc)
 
+print("\n\nDrop Model Accuracy: {:.3f} (+/- {:.3f})".format(drop_np.mean(), drop_np.std() * 2))
+print("L2 Model Accuracy: {:.3f} (+/- {:.3f})".format(l2_np.mean(), l2_np.std() * 2))
 
-"""
-print(
-    "\n\nAccuracy: {:.3f} (+/- {:.3f})".format(
-        fold_accuracies.mean(), fold_accuracies.std() * 2
-    )
-)
-"""
-
-"""
-history_drop = model_drop.fit(
-    train_images, train_labels, epochs=epochs_drop, validation_data=(test_images, test_labels)
-)
-
-history_l2 = model_l2.fit(
-    train_images, train_labels, epochs=epochs_l2, validation_data=(test_images, test_labels)
-)
-
-plt.style.use("ggplot")
-
-# Plot accuracies vs epoch for model_drop
-plt.plot(history_drop.history["accuracy"], label="accuracy")
-plt.plot(history_drop.history["val_accuracy"], label="val_accuracy")
-plt.xlabel("Epoch")
-plt.ylabel("Accuracy")
-plt.ylim([0, 1])
-plt.title("model_drop accuracy vs epochs")
-plt.legend(loc="lower right")
-test_loss, test_acc = model_drop.evaluate(test_images, test_labels, verbose=2)
-
-# Plot accuracies vs epoch for model_l2
-plt.plot(history_l2.history["accuracy"], label="accuracy")
-plt.plot(history_l2.history["val_accuracy"], label="val_accuracy")
-plt.xlabel("Epoch")
-plt.ylabel("Accuracy")
-plt.ylim([0, 1])
-plt.title("model_l2 accuracy vs epochs")
-plt.legend(loc="lower right")
-test_loss, test_acc = model_l2.evaluate(test_images, test_labels, verbose=2)
-"""
